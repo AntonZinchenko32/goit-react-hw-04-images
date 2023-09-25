@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 
 // Стили
 import { Global } from '../../styles/Global.styled';
@@ -12,89 +12,71 @@ import { Button } from '../Button/Button.js';
 import { Modal } from '../Modal/Modal.js';
 import { getAllImages } from '../services/api.js';
 
-export class App extends Component {
-  state = {
-    images: [],
-    totalHits: null,
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [totalHits, setTotalHits] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pageNumber, setPageNumber] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
 
-    isLoading: false,
-    error: '',
-    searchQuery: '',
-    pageNumber: 1,
-    showModal: false,
-    modalImage: null,
+  useEffect(() => {
+    // Записуємо дані з бекенду
+    const fetchImages = async () => {
+      setIsLoading(true);
+
+      try {
+        const data = await getAllImages(searchQuery, pageNumber);
+
+        setImages([...images, ...data.hits]);
+        setTotalHits(data.totalHits);
+      } catch (error) {
+        setError(error.response.data);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    searchQuery && fetchImages();
+  }, [searchQuery, pageNumber, images]);
+
+  const handleSearch = value => {
+    setSearchQuery(value);
+    setPageNumber(1);
+    setImages([]);
   };
 
-  async componentDidUpdate(_, prevState) {
-    const { searchQuery, pageNumber } = this.state;
-
-    const searchQueryWasUpdate = prevState.searchQuery !== searchQuery;
-    const pageNumberWasUpdate = prevState.pageNumber !== pageNumber;
-
-    if (searchQueryWasUpdate || pageNumberWasUpdate) this.fetchImages();
-  }
-
-  handleSearch = value => {
-    this.setState({ searchQuery: value, pageNumber: 1, images: [] });
+  const pageTurner = () => {
+    setPageNumber(pageNumber + 1);
   };
 
-  // Записуємо дані з бекенду
-  fetchImages = async () => {
-    const { searchQuery, pageNumber } = this.state;
-
-    this.setState({ isLoading: true });
-    try {
-      const data = await getAllImages(searchQuery, pageNumber);
-
-      this.setState(({ images }) => ({
-        images: [...images, ...data.hits],
-        totalHits: data.totalHits,
-      }));
-    } catch (error) {
-      this.setState({ error: error.response.data });
-    } finally {
-      this.setState({ isLoading: false });
-    }
+  const toogleModal = () => {
+    setShowModal(!showModal);
   };
 
-  pageTurner = () => {
-    this.setState(({ pageNumber }) => ({
-      pageNumber: pageNumber + 1,
-    }));
+  const getLargeImage = imageURL => {
+    setModalImage(imageURL);
   };
 
-  toogleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  getLargeImage = imageURL => {
-    this.setState({ modalImage: imageURL });
-  };
-
-  render() {
-    const { isLoading, images, showModal, modalImage, totalHits } = this.state;
-    const { handleSearch, pageTurner, toogleModal, getLargeImage } = this;
-    return (
-      <>
-        <Global />
-        <AppWrapper>
-          {showModal && <Modal modalImage={modalImage} onClose={toogleModal} />}
-          <Searchbar submit={handleSearch} />
-          {isLoading && <Loader />}
-          {images.length !== 0 && (
-            <>
-              <ImageGallery
-                data={images}
-                getLargeImage={getLargeImage}
-                openModalFunc={toogleModal}
-              />
-              {totalHits > images.length && <Button pageTurner={pageTurner} />}
-            </>
-          )}
-        </AppWrapper>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Global />
+      <AppWrapper>
+        {showModal && <Modal modalImage={modalImage} onClose={toogleModal} />}
+        <Searchbar submit={handleSearch} />
+        {isLoading && <Loader />}
+        {images.length !== 0 && !error && 
+          <>
+            <ImageGallery
+              data={images}
+              getLargeImage={getLargeImage}
+              openModalFunc={toogleModal}
+            />
+            {totalHits > images.length && <Button pageTurner={pageTurner} />}
+          </>
+        }
+      </AppWrapper>
+    </>
+  );
+};
