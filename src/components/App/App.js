@@ -42,7 +42,7 @@ export class App extends Component {
   fetchImages = async () => {
     const { searchQuery, pageNumber } = this.state;
 
-    this.setState({ isLoading: false });
+    this.setState({ isLoading: true });
     try {
       const data = await getAllImages(searchQuery, pageNumber);
 
