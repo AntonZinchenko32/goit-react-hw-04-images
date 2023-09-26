@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Стили
 import { Global } from '../../styles/Global.styled';
@@ -41,11 +41,11 @@ export const App = () => {
     searchQuery && fetchImages();
   }, [searchQuery, pageNumber]);
 
-  const handleSearch = value => {
+  const handleSearch = useCallback(value => {
     setSearchQuery(value);
     setPageNumber(1);
     setImages([]);
-  };
+  },[]);
 
   const toogleModal = () => {
     setShowModal(!showModal);
