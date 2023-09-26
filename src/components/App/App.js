@@ -22,6 +22,8 @@ export const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
+  
+
   useEffect(() => {
     // Записуємо дані з бекенду
     const fetchImages = async () => {
@@ -30,16 +32,17 @@ export const App = () => {
       try {
         const data = await getAllImages(searchQuery, pageNumber);
 
-        setImages([...images, ...data.hits]);
+        setImages(prevState => [...prevState, ...data.hits] );
         setTotalHits(data.totalHits);
       } catch (error) {
-        setError(error.response.data);
+        setError(error.message);
+        //  
       } finally {
         setIsLoading(false);
       }
     };
     searchQuery && fetchImages();
-  }, [searchQuery, pageNumber, images]);
+  }, [searchQuery, pageNumber]);
 
   const handleSearch = value => {
     setSearchQuery(value);
