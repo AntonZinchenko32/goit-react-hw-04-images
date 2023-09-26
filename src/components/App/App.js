@@ -45,7 +45,7 @@ export const App = () => {
     setSearchQuery(value);
     setPageNumber(1);
     setImages([]);
-  },[]);
+  }, []);
 
   const toogleModal = () => {
     setShowModal(!showModal);
