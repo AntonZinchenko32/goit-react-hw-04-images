@@ -1,30 +1,25 @@
-import { useState, useEffect } from 'react';
+import { Component } from 'react';
 import { SearchBar, Form, SearchButton, Input } from './Searchbar.styled.jsx';
 
-export const Searchbar = ({submit}) => {
-  
+export class Searchbar extends Component {
+  state = { value: '' };
 
-  const [inputValue, setInputValue] = useState('')
+  componentDidUpdate(_, prevState) {
+    const isValueWasUpdate = prevState.value !== this.state.value;
 
-  // componentDidUpdate(_, prevState) {
-  //   const isValueWasUpdate = prevState.value !== this.state.value;
+    isValueWasUpdate && this.state.value && this.props.submit(this.state.value);
+  }
 
-  //   isValueWasUpdate && this.state.value && this.props.submit(this.state.value);
-  // }
-
-  useEffect(() => {
-    inputValue && submit(inputValue);
-  },[inputValue])
-
-  const handleSubmit = e => {
+  handleSubmit = e => {
     e.preventDefault();
     const trimmedInputValue = e.currentTarget.elements.searchInput.value.trim();
-    setInputValue(trimmedInputValue );
+    this.setState({ value: trimmedInputValue });
   };
 
-  return (
+  render() {
+    return (
       <SearchBar>
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={this.handleSubmit}>
           <SearchButton type="submit" />
           <Input
             type="text"
@@ -36,6 +31,7 @@ export const Searchbar = ({submit}) => {
         </Form>
       </SearchBar>
     );
+  }
 }
 
 
