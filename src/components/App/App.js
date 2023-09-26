@@ -22,8 +22,6 @@ export const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
-  
-
   useEffect(() => {
     // Записуємо дані з бекенду
     const fetchImages = async () => {
@@ -32,11 +30,10 @@ export const App = () => {
       try {
         const data = await getAllImages(searchQuery, pageNumber);
 
-        setImages(prevState => [...prevState, ...data.hits] );
+        setImages(prevState => [...prevState, ...data.hits]);
         setTotalHits(data.totalHits);
       } catch (error) {
         setError(error.message);
-        //  
       } finally {
         setIsLoading(false);
       }
@@ -50,16 +47,8 @@ export const App = () => {
     setImages([]);
   };
 
-  const pageTurner = () => {
-    setPageNumber(pageNumber + 1);
-  };
-
   const toogleModal = () => {
     setShowModal(!showModal);
-  };
-
-  const getLargeImage = imageURL => {
-    setModalImage(imageURL);
   };
 
   return (
@@ -69,16 +58,18 @@ export const App = () => {
         {showModal && <Modal modalImage={modalImage} onClose={toogleModal} />}
         <Searchbar submit={handleSearch} />
         {isLoading && <Loader />}
-        {images.length !== 0 && !error && 
+        {images.length !== 0 && !error && (
           <>
             <ImageGallery
               data={images}
-              getLargeImage={getLargeImage}
+              getLargeImage={setModalImage}
               openModalFunc={toogleModal}
             />
-            {totalHits > images.length && <Button pageTurner={pageTurner} />}
+            {totalHits > images.length && (
+              <Button pageTurner={() => setPageNumber(pageNumber + 1)} />
+            )}
           </>
-        }
+        )}
       </AppWrapper>
     </>
   );
